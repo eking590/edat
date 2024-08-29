@@ -119,10 +119,17 @@ async def get_exam_questions(role: str, student_id: Optional[str] = None, class_
 
 #get all exams ids 
 @router.get("/get_exam_ids")
-async def get_exam_ids() -> Dict[str, List[str]]:
+async def get_exam_ids(class_id: str, user_role: str) -> Dict[str, List[str]]:
     try:
-        # Query the database to find all exam records
-        exams = await exam_questions_collection.find({}, {"_id": 1}).to_list(length=None)
+         
+        if user_role != "teacher":
+            raise HTTPException(status_code=403, detail="Unauthorized access. Only teachers can access this resource.")
+        
+
+        # Convert the exam_id string to an ObjectId
+        #class_object_id = ObjectId(class_id)
+
+        exams = await exam_questions_collection.find({"class_id": class_id}, {"_id": 1}).to_list(length=None)
         
         # Extract the exam IDs from the results
         exam_ids = [str(exam["_id"]) for exam in exams]
