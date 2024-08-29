@@ -106,13 +106,19 @@ async def get_exam_questions(role: str, student_id: Optional[str] = None, class_
         raise HTTPException(status_code=400, detail="Invalid role. Must be 'parent' or 'teacher'.")
 
 
-    exam_questions = await exam_questions_collection.find_one(query)
+    exam_questions = await exam_questions_collection.find({"class_id": class_id}, {"_id": 1}).to_list(length=None)
     
     if not exam_questions:
         raise HTTPException(status_code=404, detail="Exam questions not found for this student.")
     
     # Convert ObjectId to string
     exam_questions = convert_object_id(exam_questions)
+
+     # Extract the exam IDs from the results
+    exam_ids = [str(exam["_id"]) for exam in exam_questions]
+
+        # Return the list of exam IDs
+    return {"exam_ids": exam_ids}
 
     return exam_questions
 
