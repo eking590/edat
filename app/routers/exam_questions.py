@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import Dict, List, Optional
 import json 
+from bson import ObjectId
 from app.models.schemas import ExamRequest
 from app.services.api_service import api_request
 from app.services.db_services import exam_questions_collection, convert_object_id
@@ -135,21 +136,23 @@ async def get_exam_ids() -> Dict[str, List[str]]:
 
 #get one exam id 
 @router.get("/get_one_exam_id")
-async def get_one_exam_id() -> Dict[str, str]:
+async def get_exam_by_id(exam_id: str) -> Dict:
     try:
-        # Query the database to find one exam record (you can customize the query as needed)
-        exam = await exam_questions_collection.find_one({}, {"_id": 1})
+        # Convert the exam_id string to an ObjectId
+        exam_object_id = ObjectId(exam_id)
+        
+        # Query the database to find the exam by its ObjectId
+        exam = await exam_questions_collection.find_one({"_id": exam_object_id})
         
         if not exam:
-            raise HTTPException(status_code=404, detail="No exam found")
+            raise HTTPException(status_code=404, detail="Exam not found")
 
-        # Extract the exam ID from the result
-        exam_id = str(exam["_id"])
+        # Convert ObjectId fields to strings
+        exam = convert_object_id(exam)
 
-        # Return the exam ID
-        return {"exam_id": exam_id}
+        # Return the exam document
+        return exam
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
-
 
