@@ -113,13 +113,11 @@ async def get_exam_questions(role: str, student_id: Optional[str] = None, class_
     
     # Convert ObjectId to string
     exam_questions = [convert_object_id(exam) for exam in exam_questions]
-     # Extract the exam IDs from the results
-    #exam_ids = [str(exam["_id"]) for exam in exam_questions]
+    
 
-        # Return the list of exam IDs
     return {"exam_questions": exam_questions}
 
-    #return exam_questions
+ 
 
 
 #get all exams ids 
