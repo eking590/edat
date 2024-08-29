@@ -28,3 +28,19 @@ class ProcessExamRequest(BaseModel):
     class_id: str
 
 # Add other models here...
+class StudentInfo(BaseModel):
+    name: str
+    country: str
+    learning_objective: str
+    aspiration: str
+    interests: str
+    strengths: str
+    learning_style: str
+    struggling_topic: str
+    related_topic: str
+    neurodiversity: str
+
+class ConversationInput(BaseModel):
+    conversation: List[Dict[str, str]]
+    user_input: str
+    asked_questions: List[str]
