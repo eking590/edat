@@ -83,3 +83,25 @@ async def get_exam_results(exam_id: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+#generate exam result using student_id 
+@router.get("/exam_results/student/{student_id}", response_model=List[Dict])
+async def get_exam_results_by_student(student_id: str):
+    try:
+        # Query the database for all exam results associated with the given student_id
+        exam_results = await exam_results_collection.find({"student_id": student_id}).to_list(length=None)
+
+        # If no results are found, raise an exception
+        if not exam_results:
+            raise HTTPException(status_code=404, detail="No exam results found for this student")
+
+        # Convert ObjectId fields to strings for returning to the client
+        for exam_result in exam_results:
+            exam_result["_id"] = str(exam_result["_id"])
+
+        return exam_results
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
