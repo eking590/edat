@@ -61,4 +61,25 @@ async def process_exam_responses(request: ProcessExamRequest) -> Dict:
 
     return exam_result
 
+
 # Add more routes related to student responses...
+@router.get("/exam_results/{exam_id}", response_model=Dict)
+async def get_exam_results(exam_id: str):
+    try:
+        # Convert the exam_id to an ObjectId
+        exam_object_id = ObjectId(exam_id)
+
+        # Query the database for the exam result
+        exam_result = await exam_results_collection.find_one({"_id": exam_object_id})
+
+        # If no result is found, raise an exception
+        if not exam_result:
+            raise HTTPException(status_code=404, detail="Exam result not found")
+
+        # Convert ObjectId to string for returning to the client
+        exam_result["_id"] = str(exam_result["_id"])
+
+        return exam_result
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
