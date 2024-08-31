@@ -8,6 +8,7 @@ from app.services.db_services import exam_questions_collection, convert_object_i
 
 router = APIRouter()
 
+
 @router.post("/generate_exam_questions")
 async def generate_exam_questions(request: ExamRequest) -> Dict:
     
@@ -158,13 +159,12 @@ async def get_exam_by_id(exam_id: str) -> Dict:
         
         if not exam:
             raise HTTPException(status_code=404, detail="Exam not found")
-
+        
         # Convert ObjectId fields to strings
         exam = convert_object_id(exam)
-
+        
         # Return the exam document
-        return exam
+        return {"exam_question": exam}
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
-

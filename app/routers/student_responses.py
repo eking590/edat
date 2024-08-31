@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from typing import Dict, List, Optional
+from bson import ObjectId
 from app.models.schemas import ProcessExamRequest
 from app.services.db_services import exam_results_collection
 from app.routers.marking import mark_student_response
@@ -62,3 +63,43 @@ async def process_exam_responses(request: ProcessExamRequest) -> Dict:
     return exam_result
 
 # Add more routes related to student responses...
+@router.get("/exam_results/{exam_id}", response_model=Dict)
+async def get_exam_results(exam_id: str):
+    try:
+        # Convert the exam_id to an ObjectId
+        exam_object_id = ObjectId(exam_id)
+
+        # Query the database for the exam result
+        exam_result = await exam_results_collection.find_one({"_id": exam_object_id})
+
+        # If no result is found, raise an exception
+        if not exam_result:
+            raise HTTPException(status_code=404, detail="Exam result not found")
+
+        # Convert ObjectId to string for returning to the client
+        exam_result["_id"] = str(exam_result["_id"])
+
+        return exam_result
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+#generate exam result using student_id 
+@router.get("/exam_results/student/{student_id}", response_model=List[Dict])
+async def get_exam_results_by_student(student_id: str):
+    try:
+        # Query the database for all exam results associated with the given student_id
+        exam_results = await exam_results_collection.find({"student_id": student_id}).to_list(length=None)
+
+        # If no results are found, raise an exception
+        if not exam_results:
+            raise HTTPException(status_code=404, detail="No exam results found for this student")
+
+        # Convert ObjectId fields to strings for returning to the client
+        for exam_result in exam_results:
+            exam_result["_id"] = str(exam_result["_id"])
+
+        return exam_results
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
