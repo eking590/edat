@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 from bson import ObjectId
 from app.models.schemas import ProcessExamRequest
 from app.services.db_services import exam_results_collection
+from app.services.db_services import student_response_collection
 from app.routers.marking import mark_student_response
 from app.models.schemas import MarkRequest
 
@@ -105,3 +106,76 @@ async def get_exam_results_by_student(student_id: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+#process exam result using student_id
+@router.get("/process_exam_result/{student_id}")
+async def process_exam_result(student_id: str) -> Dict:
+    # Fetch all responses for the student from the database
+    student_responses = await student_response_collection.find({"student_id": student_id}).to_list(length=None)
+
+    if not student_responses:
+        raise HTTPException(status_code=404, detail="No responses found for the given student ID.")
+
+    total_marks = 0
+    all_objectives = set()
+    marks_per_objective = {}
+    total_marks_per_objective = {}
+
+    # Initialize objectives and total marks
+    for response in student_responses:
+        question_objectives = response['question'].get('learning_objectives', [])
+        all_objectives.update(question_objectives)
+
+    # Initialize marks per objective
+    for obj in all_objectives:
+        marks_per_objective[obj] = 0
+        total_marks_per_objective[obj] = 0
+
+    results_per_question = {}
+    
+    # Process each response to calculate the exam result
+    for response in student_responses:
+        question_number = response['question'].get('number', 'Unknown')
+        question_marks = response['question'].get('marks', 0)
+        question_objectives = response['question'].get('learning_objectives', [])
+        marks_awarded = response.get('marks_awarded', 0)
+        feedback = response.get('feedback', '')
+        justification = response.get('justification', '')
+
+        results_per_question[question_number] = {
+            "marks_awarded": marks_awarded,
+            "feedback": feedback,
+            "justification": justification
+        }
+        total_marks += marks_awarded
+
+        for obj in question_objectives:
+            marks_per_objective[obj] += marks_awarded
+            total_marks_per_objective[obj] += question_marks
+
+    performance_per_objective = {
+        obj: {
+            "raw_score": marks_per_objective[obj],
+            "total_available": total_marks_per_objective[obj],
+            "percentage": (marks_per_objective[obj] / total_marks_per_objective[obj]) * 100 if total_marks_per_objective[obj] > 0 else 0
+        } for obj in marks_per_objective
+    }
+
+    exam_result = {
+        "student_name": student_responses[0].get("student_name"),
+        "student_id": student_id,
+        "class_id": student_responses[0].get("class_id"),
+        "total_marks": total_marks,
+        "results_per_question": results_per_question,
+        "performance_per_objective": performance_per_objective
+    }
+
+    # Store the processed exam result in MongoDB
+    result = await exam_results_collection.insert_one(exam_result)
+
+    # Convert ObjectId to string for returning to the client
+    exam_result["_id"] = str(result.inserted_id)
+
+    return exam_result
