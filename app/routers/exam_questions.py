@@ -81,7 +81,7 @@ async def generate_exam_questions(request: ExamRequest) -> Dict:
         # Convert ObjectId to string
         exam_questions['_id'] = str(result.inserted_id)
         
-        return exam_questions
+        return {"exam_question": exam_questions}
         
         #return json.loads(response)
     except json.JSONDecodeError:
