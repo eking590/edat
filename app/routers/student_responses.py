@@ -63,7 +63,7 @@ async def process_exam_responses(request: ProcessExamRequest) -> Dict:
     return exam_result
 
 
-# Add more routes related to student responses...
+
 
 # Add more routes related to student responses...
 @router.get("/exam_results/{exam_id}", response_model=Dict)
