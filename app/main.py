@@ -6,7 +6,11 @@ from app.routers import exam_questions, marking, student_responses
 app = FastAPI()
 
 # CORS settings
-origins = ["*"]
+
+origins = [
+    "https://tiny-mermaid-e59e6b.netlify.app",  # Add your domain here
+]
+#origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
