@@ -7,10 +7,8 @@ app = FastAPI()
 
 # CORS settings
 
-origins = [
-    "https://tiny-mermaid-e59e6b.netlify.app",  # Add your domain here
-]
-#origins = ["*"]
+
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
