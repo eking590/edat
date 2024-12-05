@@ -3,10 +3,11 @@ from bson import ObjectId
 from app.config import MONGO_DB_URI
 
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_DB_URI)
-database = client['test']
+database = client['production']
 exam_questions_collection = database['examquestions']
 student_response_collection = database['studentresponse']
-exam_results_collection = database['examresults']
+exam_results_collection = database['examresults'] 
+class_room_collection = database['classrooms']
 
 def convert_object_id(document):
     if isinstance(document, dict):
