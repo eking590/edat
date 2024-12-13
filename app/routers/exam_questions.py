@@ -35,6 +35,7 @@ async def generate_exam_questions(request: ExamRequest) -> Dict:
             - Examination Board: {request.exam_board}
             - Country: {request.country}
             - Subject: {request.subject}
+            - Exam_length: {request.exam_length}
             - student_id: {request.student_id}
             - class_id: {request.class_id}
             - Learning Objectives: {', '.join(request.learning_objectives)} #gets the learning objectives from the database
@@ -77,15 +78,16 @@ async def generate_exam_questions(request: ExamRequest) -> Dict:
         # Add student_id and class_id to the exam_questions document
         exam_questions['student_id'] = request.student_id
         exam_questions['class_id'] = request.class_id
+        exam_questions['exam_length'] = request.exam_length
         
         # Store exam questions in MongoDB
      
 
         # Include student_id and class_id based on the role
-        #if request.role == "teacher":
-         #   exam_questions['class_id'] = request.class_id
-        #elif request.role == "parent":
-         #   exam_questions['student_id'] = request.student_id
+        if request.role == "teacher":
+           exam_questions['class_id'] = request.class_id
+        elif request.role == "parent":
+            exam_questions['student_id'] = request.student_id
 
 
         result = await exam_questions_collection.insert_one(exam_questions)
