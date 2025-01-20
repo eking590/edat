@@ -4,7 +4,8 @@ import json
 from typing import Dict, List, Optional
 from fastapi import HTTPException
 
-API_KEY = "dPFNmccRAPS77upmo1mQYcYUFXm3a15z"
+#API_KEY = "dPFNmccRAPS77upmo1mQYcYUFXm3a15z"
+API_KEY = "yia1aigVtSWbrssBKINWyDjtnwRNXem0"
 ENDPOINT_URL = "https://api.mistral.ai/v1/chat/completions"
 MODEL = "mistral-tiny"
 
