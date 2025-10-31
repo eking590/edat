@@ -132,7 +132,7 @@ async def generate_exam_questions(request: ExamRequest) -> Dict:
 #write a function to update the classroom in the database 
 
 
-'''
+
 @router.get("/get_exam_questions")
 async def get_exam_questions(role: str, student_id: Optional[str] = None, class_id: Optional[str] = None) -> Dict:
     query = {}
@@ -161,12 +161,12 @@ async def get_exam_questions(role: str, student_id: Optional[str] = None, class_
 
     return {"exam_questions": exam_questions}
 
-'''
+
  
 
 
 #get all exams ids 
-''''
+
 @router.get("/get_exam_ids")
 async def get_exam_ids(class_id: str, user_role: str) -> Dict[str, List[str]]:
     try:
@@ -189,10 +189,10 @@ async def get_exam_ids(class_id: str, user_role: str) -> Dict[str, List[str]]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
-'''
+
 
 #get one exam id 
-'''
+
 @router.get("/get_one_exam_id")
 async def get_exam_by_id(exam_id: str) -> Dict:
     try:
@@ -214,4 +214,4 @@ async def get_exam_by_id(exam_id: str) -> Dict:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
-'''
+
