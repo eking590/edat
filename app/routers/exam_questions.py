@@ -4,7 +4,7 @@ import json
 from bson import ObjectId
 from datetime import datetime
 from app.models.schemas import ExamRequest
-from app.services.api_service import api_request, clean_math_language
+from app.services.api_service import api_request
 from app.services.db_services import exam_questions_collection, convert_object_id 
 from app.services.db_services import class_room_collection
 
@@ -53,10 +53,8 @@ async def generate_exam_questions(request: ExamRequest) -> Dict:
             7. Ensure questions and subquestions are unique.
             8. For the mark scheme, ensure you allocate marks for working out or process.
             9. Use proper mathematical notation for fractions, equations, powers, square roots, etc.
-            10. If there are no mathematical notation for every word should be in their original state. 
         
-            Respond ONLY with a valid JSON object in the following format, and nothing else:
-            
+            Format the output as a JSON object with the following structure:
             {{
                 "questions": [
                     {{
@@ -69,18 +67,10 @@ async def generate_exam_questions(request: ExamRequest) -> Dict:
                     ...
                     ]
             }}
-            """ 
-
-            #print(context)
-       
-      
-        
+            """
 
         messages = [{"role": "user", "content": context}]
         response_text =    api_request(messages, 2000)
-
-        # Clean malformed LaTeX substitutions in the AI response
-        response_text = clean_math_language(response_text)
 
         start = response_text.find('{')
         end = response_text.rfind('}') + 1 
@@ -88,26 +78,10 @@ async def generate_exam_questions(request: ExamRequest) -> Dict:
         if start == -1 or end == -1:
             raise HTTPException(status_code=500, detail="No JSON object found in response.")
         json_str = response_text[start:end]
-
-        # Fix invalid escape sequences before parsing
-        json_str = json_str.replace('\\', '\\\\')
         
         # Parse the JSON string
         try:
             exam_questions = json.loads(json_str)
-             # Fix typo: change all "te\timest" keys to "text" in questions
-            for question in exam_questions.get("questions", []):
-                if "te\\timest" in question:
-                    question["text"] = question.pop("te\\timest")
-                elif "te\timest" in question:
-                    question["text"] = question.pop("te\timest")
-                elif "tetimest" in question:
-                    question["text"] = question.pop("tetimest")
-                elif "text" not in question:
-                    raise HTTPException(status_code=500, detail="Question text is missing in the response.")
-                # Ensure 'marks' is present and is an integer
-                if "marks" not in question or not isinstance(question["marks"], int):
-                    raise HTTPException(status_code=500, detail="Marks field is missing or not an integer in the response.")
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Failed to parse JSON response: {e}")
         
